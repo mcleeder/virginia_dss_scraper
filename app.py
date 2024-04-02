@@ -61,9 +61,7 @@ async def fetch_urls(urls):
         return responses
 
 async def main():
-    # urls = _get_daycare_details_urls()
-    # Debug
-    urls = ["https://www.dss.virginia.gov/facility/search/cc2.cgi?rm=Details;ID=35291;search_require_client_code-2101=1"]
+    urls = _get_daycare_details_urls()
     responses = await fetch_urls(urls)
     
     inspections_with_violations = []
