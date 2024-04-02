@@ -23,6 +23,9 @@ def _get_urls() -> list[str]:
 
     return [f"https://www.dss.virginia.gov{x.attrib.get("href")}" for x in raw_anchor_tags]
 
+def _has_violations(response) -> bool:
+    pass
+
 async def fetch_url(url, retries=3, retry_interval=1):
     while retries:
         try:
@@ -44,10 +47,10 @@ async def fetch_urls(urls):
         return responses
 
 async def main():
-    urls = _get_urls()
+    # Go get the URL & for every Daycare
+    # urls = _get_urls()
+    urls = ["https://www.dss.virginia.gov/facility/search/cc2.cgi?rm=Details;ID=35291;search_require_client_code-2101=1"]
     responses = await fetch_urls(urls)
-    for response in responses:
-        print(response)
 
 if __name__ == "__main__":
     asyncio.run(main())
