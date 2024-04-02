@@ -54,13 +54,12 @@ async def fetch_url(url, retries=3, retry_interval=1):
 
 async def fetch_urls(urls):
     tasks = []
-    async with aiohttp.ClientSession():
-        for url in urls:
-            task = asyncio.create_task(fetch_url(url))
-            tasks.append(task)
+    for url in urls:
+        task = asyncio.create_task(fetch_url(url))
+        tasks.append(task)
 
-        responses = await asyncio.gather(*tasks)
-        return responses
+    responses = await asyncio.gather(*tasks)
+    return responses
 
 async def main():
     urls = _get_daycare_details_urls()
