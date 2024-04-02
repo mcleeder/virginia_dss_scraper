@@ -7,7 +7,7 @@ def element(html: HtmlElement, xpath: str) -> HtmlElement | None:
 def elements(html: HtmlElement, xpath: str) -> list[HtmlElement | None]:
     return [*html.xpath(f".{xpath}")]
 
-def contains_string(element: HtmlElement, target: str):
+def contains_string(element: HtmlElement, target: str) -> bool:
     if target in (element.text or ''):
         return True
     for child in element.iterchildren():
