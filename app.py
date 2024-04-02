@@ -1,10 +1,10 @@
 import requests
 from lxml.html import fromstring
-from scraper import elements
+from scraper import elements, element, contains_string
 import asyncio
 import aiohttp
 
-def _get_urls() -> list[str]:
+def _get_daycare_details_urls() -> list[str]:
     data_url = "https://www.dss.virginia.gov/facility/search/cc2.cgi"
 
     form_data = {
@@ -23,8 +23,22 @@ def _get_urls() -> list[str]:
 
     return [f"https://www.dss.virginia.gov{x.attrib.get("href")}" for x in raw_anchor_tags]
 
-def _has_violations(response) -> bool:
-    pass
+
+def _parse_violations(response) -> list[str | None]:
+    violation_detail_urls = []
+
+    html_tree = fromstring(response)
+    table = element(html_tree, "//b[contains(text(), 'Inspection Date')]/ancestor::table")
+    rows = elements(table, "//tr")[1:] # Drop the header row
+    for row in rows:
+        if cells := elements(row, "//td"):
+            violation_cell = cells[-1]
+            has_violation = contains_string(violation_cell, "Yes")
+            date_in_range = contains_string(cells[0], "2023") or contains_string(cells[0], "2022")
+            if date_in_range and has_violation:
+                url = element(violation_cell, "//a").attrib.get("href")
+                violation_detail_urls.append(f"https://www.dss.virginia.gov{url}")
+    return violation_detail_urls
 
 async def fetch_url(url, retries=3, retry_interval=1):
     while retries:
@@ -47,10 +61,16 @@ async def fetch_urls(urls):
         return responses
 
 async def main():
-    # Go get the URL & for every Daycare
-    # urls = _get_urls()
+    # urls = _get_daycare_details_urls()
+    # Debug
     urls = ["https://www.dss.virginia.gov/facility/search/cc2.cgi?rm=Details;ID=35291;search_require_client_code-2101=1"]
     responses = await fetch_urls(urls)
+    
+    inspections_with_violations = []
+    for resp in responses:
+        inspections_with_violations += _parse_violations(resp)
+    
+    print("Done!")
 
 if __name__ == "__main__":
     asyncio.run(main())
