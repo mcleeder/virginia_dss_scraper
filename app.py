@@ -27,17 +27,19 @@ def _get_daycare_details_urls() -> list[str]:
 def _parse_violations(response) -> list[str | None]:
     violation_detail_urls = []
 
-    html_tree = fromstring(response)
-    table = element(html_tree, "//b[contains(text(), 'Inspection Date')]/ancestor::table")
-    rows = elements(table, "//tr")[1:] # Drop the header row
-    for row in rows:
-        if cells := elements(row, "//td"):
-            violation_cell = cells[-1]
-            has_violation = contains_string(violation_cell, "Yes")
-            date_in_range = contains_string(cells[0], "2023") or contains_string(cells[0], "2022")
-            if date_in_range and has_violation:
-                url = element(violation_cell, "//a").attrib.get("href")
-                violation_detail_urls.append(f"https://www.dss.virginia.gov{url}")
+    if response:
+        html_tree = fromstring(response)
+        table = element(html_tree, "//b[contains(text(), 'Inspection Date')]/ancestor::table")
+        rows = elements(table, "//tr")[1:] # Drop the header row
+        for row in rows:
+            if cells := elements(row, "//td"):
+                violation_cell = cells[-1]
+                has_violation = contains_string(violation_cell, "Yes")
+                date_in_range = contains_string(cells[0], "2023") or contains_string(cells[0], "2022")
+                if date_in_range and has_violation:
+                    url = element(violation_cell, "//a").attrib.get("href")
+                    violation_detail_urls.append(f"https://www.dss.virginia.gov{url}")
+
     return violation_detail_urls
 
 async def fetch_url(url, retries=3, retry_interval=1):
@@ -68,7 +70,7 @@ async def main():
     for resp in responses:
         inspections_with_violations += _parse_violations(resp)
     
-    print("Done!")
+    print(f"Done! Found {len(inspections_with_violations)} violations between 2022 and 2023")
 
 if __name__ == "__main__":
     asyncio.run(main())
