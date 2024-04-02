@@ -1,4 +1,4 @@
-# Scraper
+# Virginia Department of Social Services Scraper
 
 Scrapes the Virginia DSS website with the goal of noting any daycares with inspection violations.
 I do not live in Virginia, this was a request by another dev.
